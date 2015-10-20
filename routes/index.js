@@ -62,6 +62,14 @@ router.get('/list/', function(req, res) {
   });
 });
 
+router.get('/pdf/:id?', function(req, res) {
+  if(req.params.id === undefined) {
+    res.download('/opt/mean/public/pdf/Spektrum_Surface_Tradeup_Redemption_Form.pdf', 'Spektrum_Surface_Tradeup_Redemption_Form.pdf');
+  } else if(req.params.id.toLowerCase() === 'air'){
+    res.download('/opt/mean/public/pdf/Spektrum_Air_Transmitter_Trade_Up_Form.pdf', 'Spektrum_Air_Transmitter_Trade_Up_Form.pdf');
+  }
+});
+
 var checkParam=function(a){return void 0===a?{}:a.match(/^{/)?JSON.parse(a):objectify(a)};
 
 var objectify=function(r){for(var t={},a=r.split(","),n=0;n<a.length;n++){var e=a[n].split(":");t[e[0]]=parseInt(e[1])?parseInt(e[1]):e[1]}return t};
