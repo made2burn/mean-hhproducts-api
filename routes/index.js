@@ -8,32 +8,32 @@ var express = require('express'),
 
 router.get('/', function(req, res) {
   res.render('index', {
-   title : 'suprsidr ninja'
+   title : 'Product Data Hosting'
   });
 });
 
 router.param('q', function(req, res, next, q) {
   req.params.q = checkParam(q);
   //console.log(req.params.q)
-  next(); 
+  next();
 });
 
 router.param('l', function(req, res, next, l) {
   req.params.l = parseInt(l) ? parseInt(l) : 0;
   //console.log(req.params.l)
-  next(); 
+  next();
 });
 
 router.param('s', function(req, res, next, s) {
   req.params.s = checkParam(s);
   //console.log(req.params.s)
-  next(); 
+  next();
 });
 
 router.param('f', function(req, res, next, f) {
   req.params.f = checkParam(f);
   //console.log(req.params.f)
-  next(); 
+  next();
 });
 
 router.get('/search/:q/:l?/:s?/:f?', function(req, res) {
@@ -55,10 +55,22 @@ router.get('/search/:q/:l?/:s?/:f?', function(req, res) {
   });
 });
 
-router.get('/list/', function(req, res) {
-  itemProvider.findItems({collection: 'products'}, function(err, data) {
-    res.jsonp(data);
-    res.end();
+router.get('/forcerc/search/:q/:l?/:s?/:f?', function(req, res) {
+  itemProvider.findItems({
+    collection: 'forceproducts',
+    query: req.params.q || {},
+    limit: req.params.l,
+    sort: req.params.s,
+    fields: req.params.f || {}
+  }, function(err, items) {
+    if(err || items.length === 0) {
+      //console.log(err)
+      res.jsonp({"error": "Not Found"});
+      res.end();
+    } else {
+      res.jsonp(items);
+      res.end();
+    }
   });
 });
 
