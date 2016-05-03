@@ -1,10 +1,15 @@
+/**
+ * this script is run from commandline to insert HH.com product data into local MongoDB
+ * 
+ */
 var ItemProvider = require('./itemprovider-mongodb').ItemProvider,
     itemProvider = new ItemProvider(),
     merge = require('merge'),
-    data = require('./hh2products').Products;
+    data = require('./hh2products').Products; // this file is uploaded to the server from the API updater script and contains all product data
 
 var i = 0, l = data.length;
 
+// iterate over our product data and insert into MongoDB
 function saveToDb() {
   itemProvider.findOne({collection: 'products', query: {ProdID: data[i].ProdID}}, function(err, item) {
     if(err){
@@ -39,6 +44,7 @@ function saveToDb() {
   });
 }
 
+// open DB -> insert items into DB
 itemProvider.open(function(){
   saveToDb();
 });

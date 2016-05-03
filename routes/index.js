@@ -5,13 +5,19 @@ var express = require('express'),
     itemProvider.open(function(){});
 
 /* GET home page. */
-
 router.get('/', function(req, res) {
   res.render('index', {
    title : 'Product Data Hosting'
   });
 });
 
+/**
+ *  Route params we are expecting
+ *  q - query
+ *  l - limit
+ *  s - sort
+ *  f - fields to return
+ */
 router.param('q', function(req, res, next, q) {
   req.params.q = checkParam(q);
   //console.log(req.params.q)
@@ -36,6 +42,9 @@ router.param('f', function(req, res, next, f) {
   next();
 });
 
+/**
+ * endpoint for HH.com
+ */
 router.get('/search/:q/:l?/:s?/:f?', function(req, res) {
   itemProvider.findItems({
     collection: 'products',
@@ -55,6 +64,9 @@ router.get('/search/:q/:l?/:s?/:f?', function(req, res) {
   });
 });
 
+/**
+ * endpoint for Force
+ */
 router.get('/forcerc/search/:q/:l?/:s?/:f?', function(req, res) {
   itemProvider.findItems({
     collection: 'forceproducts',
@@ -74,6 +86,10 @@ router.get('/forcerc/search/:q/:l?/:s?/:f?', function(req, res) {
   });
 });
 
+/**
+ * force PDF download hack
+ * should be able to remove this soon
+ */
 router.get('/pdf/:id?', function(req, res) {
   if(req.params.id === undefined) {
     res.download('/opt/mean/public/pdf/Spektrum_Surface_Tradeup_Redemption_Form.pdf', 'Spektrum_Surface_Tradeup_Redemption_Form.pdf');
@@ -82,8 +98,10 @@ router.get('/pdf/:id?', function(req, res) {
   }
 });
 
+// validate param
 var checkParam=function(a){return void 0===a?{}:a.match(/^{/)?JSON.parse(a):objectify(a)};
 
+// turn simple string into object
 var objectify=function(r){for(var t={},a=r.split(","),n=0;n<a.length;n++){var e=a[n].split(":");t[e[0]]=parseInt(e[1])?parseInt(e[1]):e[1]}return t};
 
 module.exports = router;
