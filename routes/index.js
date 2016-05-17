@@ -2,13 +2,12 @@ var express = require('express'),
     router = express.Router(),
     ItemProvider = require('../itemprovider-mongodb').ItemProvider,
     itemProvider = new ItemProvider();
-    itemProvider.open(function(){});
+    itemProvider.open(function(){}),
+    path = require('path');
 
 /* GET home page. */
 router.get('/', function(req, res) {
-  res.render('index', {
-   title : 'Product Data Hosting'
-  });
+  res.sendFile(path.resolve(__dirname,'../index.html'));
 });
 
 /**
