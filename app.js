@@ -1,11 +1,28 @@
+var fs = require('fs');
 var express = require('express');
+var http = require('http');
+var https = require('https');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var compress = require('compression');
 var routes = require('./routes/index');
+var key = fs.readFileSync('./suprsidr.wtf-key.pem');
+var cert = fs.readFileSync('./suprsidr.wtf-cert.pem')
+var https_options = {
+    key: key,
+    cert: cert
+};
 
 var app = express();
+
+function ensureSecure(req, res, next){
+  if(req.secure){
+    // OK, continue
+    return next();
+  };
+  res.redirect('https://'+req.hostname+req.url);
+};
 
 app.set("jsonp callback", true);
 
@@ -15,6 +32,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.all('*', ensureSecure);
 
 app.use('/', routes); // our routes are in routes/index.js
 
@@ -56,8 +74,8 @@ app.use(function (err, req, res, next) {
 
 var debug = require('debug')('dbApp');
 
-app.set('port', process.env.PORT || 3000);
-
-var server = app.listen(app.get('port'), function () {
+app.set('port', process.env.PORT || 443);
+var insecureServer = http.createServer(app).listen(80)
+var server = https.createServer(https_options, app).listen(app.get('port'), function () {
   debug('Express server listening on port ' + server.address().port);
 });
