@@ -18,7 +18,7 @@ router.get('/', function(req, res) {
  *  f - fields to return
  */
 router.param('q', function(req, res, next, q) {
-  req.params.q = checkParam(q);
+  req.params.q = handleRegex(checkParam(q));
   //console.log(req.params.q)
   next();
 });
@@ -96,6 +96,20 @@ router.get('/pdf/:id?', function(req, res) {
     res.download('/opt/mean/public/pdf/Spektrum_Air_Transmitter_Trade_Up_Form.pdf', 'Spektrum_Air_Transmitter_Trade_Up_Form.pdf');
   }
 });
+
+// handle RegExp
+function handleRegex(obj) {
+  for (var prop in obj) {
+    if(obj.hasOwnProperty(prop)) {
+      if(prop.includes('$regex') && Array.isArray(obj[prop])) {
+        obj[prop] = new RegExp(obj[prop][0], obj[prop][1] || '');
+      } else if(typeof obj[prop] === 'object') {
+        handleRegex(obj[prop]);
+      }
+    } 
+  }
+  return obj;
+}
 
 // validate param
 var checkParam=function(a){return void 0===a?{}:a.match(/^{/)?JSON.parse(a):objectify(a)};
