@@ -15,6 +15,13 @@ var https_options = {
 };
 
 var app = express();
+var allowCrossDomain = function(req, res, next) {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
+
+    next();
+}
 
 function ensureSecure(req, res, next){
   if(req.secure){
@@ -32,6 +39,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(allowCrossDomain);
 app.all('*', ensureSecure);
 
 app.use('/', routes); // our routes are in routes/index.js
@@ -75,7 +83,7 @@ app.use(function (err, req, res, next) {
 var debug = require('debug')('dbApp');
 
 app.set('port', process.env.PORT || 443);
-var insecureServer = http.createServer(app).listen(80)
+var insecureServer = http.createServer(app).listen(8080)
 var server = https.createServer(https_options, app).listen(app.get('port'), function () {
   debug('Express server listening on port ' + server.address().port);
 });

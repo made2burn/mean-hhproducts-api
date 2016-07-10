@@ -1,0 +1,9 @@
+{
+  "apps": [
+    {
+      "name": "data-api",
+      "script": "./app.js",
+      "watch": ["routes"]
+    }
+  ]
+}

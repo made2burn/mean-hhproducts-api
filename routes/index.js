@@ -86,6 +86,53 @@ router.get('/forcerc/search/:q/:l?/:s?/:f?', function(req, res) {
 });
 
 /**
+ * endpoint for delete student
+ * @param {q} query of student to delete
+ * {"sid": "8f7325f8-7b23-428b-bbed-d1650b216249"}
+ */
+ router.post('/students/delete/:q', function(req, res) {
+   if(req.params.q === '') {
+     res.jsonp({"error": "Bad or missing param: query"});
+     return res.end();
+   }
+   itemProvider.deleteItem({
+     collection: 'students',
+     query: req.params.q
+   }, function(err, result) {
+     if(err) {
+       console.log(err)
+       res.jsonp({"error": "Not Found"});
+       res.end();
+     } else {
+       res.jsonp({"result": result});
+       res.end();
+     }
+   });
+ });
+
+/**
+ * endpoint for students
+ */
+router.get('/students/:q/:l?/:s?/:f?', function(req, res) {
+  itemProvider.findItems({
+    collection: 'students',
+    query: req.params.q || {},
+    limit: req.params.l,
+    sort: req.params.s,
+    fields: req.params.f || {}
+  }, function(err, items) {
+    if(err || items.length === 0) {
+      //console.log(err)
+      res.jsonp({"error": "Not Found"});
+      res.end();
+    } else {
+      res.jsonp(items);
+      res.end();
+    }
+  });
+});
+
+/**
  * force PDF download hack
  * should be able to remove this soon
  */
@@ -106,7 +153,7 @@ function handleRegex(obj) {
       } else if(typeof obj[prop] === 'object') {
         handleRegex(obj[prop]);
       }
-    } 
+    }
   }
   return obj;
 }
