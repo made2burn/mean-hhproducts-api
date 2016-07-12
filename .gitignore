@@ -30,3 +30,4 @@ node_modules
 config.js
 hh2products.js
 .idea
+*.pem
