@@ -3,6 +3,7 @@ var express = require('express'),
     ItemProvider = require('../itemprovider-mongodb').ItemProvider,
     itemProvider = new ItemProvider();
     itemProvider.open(function(){}),
+    uuid = require('uuid'),
     path = require('path');
 
 /* GET home page. */
@@ -87,7 +88,7 @@ router.get('/forcerc/search/:q/:l?/:s?/:f?', function(req, res) {
 
 /**
  * endpoint for delete student
- * @param {q} query of student to delete
+ * @param {object} query of student to delete
  * {"sid": "8f7325f8-7b23-428b-bbed-d1650b216249"}
  */
  router.post('/students/delete/:q', function(req, res) {
@@ -109,6 +110,72 @@ router.get('/forcerc/search/:q/:l?/:s?/:f?', function(req, res) {
      }
    });
  });
+
+ /**
+  * endpoint for insert student
+  * @param {object}
+  */
+  router.post(/^\/students\/insert\/(.+)/, function(req, res) {
+    console.log(req.params);
+    if(req.params[0] !== '') {
+      req.params.q = JSON.parse(req.params[0]);
+    }
+    if(req.params.q === '') {
+      res.jsonp({"error": "Bad or missing param: query"});
+      return res.end();
+    }
+    var student = req.params.q.student;
+    student.sid = uuid.v4();
+    student.modified = Date.now();
+    student.modifiedby = req.params.q.admin;
+    itemProvider.save({
+      collection: 'students'
+    },
+     student
+    , function(err, result) {
+      if(err) {
+        console.log(err)
+        res.jsonp({"error": "Not Found"});
+        res.end();
+      } else {
+        res.jsonp({"result": result});
+        res.end();
+      }
+    });
+  });
+
+ /**
+  * endpoint for edit student
+  * @param {object} admin username, query of student data to update - must include sid
+  * {admin: "admin username", student: {"sid": "8f7325f8-7b23-428b-bbed-d1650b216249", "gpa": "4.0"}}
+  */
+  router.post(/^\/students\/update\/(.+)/, function(req, res) {
+    console.log(req.params);
+    if(req.params[0] !== '') {
+      req.params.q = JSON.parse(req.params[0]);
+    }
+    if(req.params.q === '') {
+      res.jsonp({"error": "Bad or missing param: query"});
+      return res.end();
+    }
+    var student = req.params.q.student;
+    student.modified = Date.now();
+    student.modifiedby = req.params.q.admin;
+    itemProvider.updateItem({
+      collection: 'students',
+      query: {sid: student.sid},
+      action: {$set: student}
+    }, function(err, result) {
+      if(err) {
+        console.log(err)
+        res.jsonp({"error": "Not Found"});
+        res.end();
+      } else {
+        res.jsonp({"result": result});
+        res.end();
+      }
+    });
+  });
 
 /**
  * endpoint for students
