@@ -3,15 +3,24 @@ var express = require('express');
 var http = require('http');
 var https = require('https');
 var path = require('path');
+var crypto = require('crypto');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var compress = require('compression');
 var routes = require('./routes/index');
-var key = fs.readFileSync('./suprsidr.wtf-key.pem');
-var cert = fs.readFileSync('./suprsidr.wtf-cert.pem')
 var https_options = {
-    key: key,
-    cert: cert
+  SNICallback: function (domain) {
+    return crypto.createCredentials({
+      key:  fs.readFileSync('/path/to/domain.key'),
+      cert: fs.readFileSync('/path/to/domain.crt'),
+      ca: [
+        fs.readFileSync('/path/to/CA_cert_1.crt'),
+        fs.readFileSync('/path/to/CA_cert_2.crt')
+      ]
+    }).context;
+  },
+  cert: fs.readFileSync('/path/to/server.crt'),
+  key: fs.readFileSync('/path/to/server.key'),
 };
 
 var app = express();
